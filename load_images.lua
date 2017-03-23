@@ -1,7 +1,10 @@
+
 require 'image'
 require 'torch'
 
-function load_images(dir, ext)
+load_images = {}
+
+function load_images.load(dir, ext)
 
 	-- 1. Load all files in directory
 
@@ -51,3 +54,5 @@ function load_images(dir, ext)
 	return images
 
 end
+
+return load_images
