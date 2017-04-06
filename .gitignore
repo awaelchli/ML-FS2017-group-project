@@ -1,2 +1,4 @@
 .ipynb_checkpoints/*
 *~
+/loss_log.txt
+/test.png
