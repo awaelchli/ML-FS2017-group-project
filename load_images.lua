@@ -4,7 +4,11 @@ require 'torch'
 
 load_images = {}
 
-function load_images.load(dir, ext)
+function load_images.load(dir, ext, verbose)
+
+	if verbose == nil then
+		verbose = true
+	end
 
 	-- 1. Load all files in directory
 
@@ -35,8 +39,10 @@ function load_images.load(dir, ext)
 
 	table.sort(files, function (a,b) return a < b end)
 
-	print('Found files:')
-	print(files)
+	if verbose == true then
+		print('Found files:')
+		print(files)
+	end
 
 	----------------------------------------------------------------------
 	-- 3. Finally we load images
@@ -48,8 +54,10 @@ function load_images.load(dir, ext)
 	   table.insert(images, image.load(file))
 	end
 
-	print('Loaded images:')
-	print(images)
+	if verbose == true then
+		print('Loaded images:')
+		print(images)
+	end
 
 	return images
 
