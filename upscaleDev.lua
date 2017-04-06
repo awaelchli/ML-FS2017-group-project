@@ -132,27 +132,11 @@ imgselector = 7
 local origin = imagesLR[imgselector]
 local gt = imagesHR[imgselector]
 local test = net:forward(origin)
+--[[
 local scaled = image.scale(origin, gt:size(3), gt:size(2), 'simple') -- upscaled(nearest neighbor) LR
 local scaledbl = image.scale(origin, gt:size(3), gt:size(2), 'bilinear') -- upscaled(nearest neighbor) LR
 local scaledbc = image.scale(origin, gt:size(3), gt:size(2), 'bicubic') -- upscaled(nearest neighbor) LR
 local diff = torch.add(gt, -1, test)
 local diff2 = torch.add(scaledbc, -1, test)
-
+--]]
 image.save("test.png", test)
-
--- [[
---itorch.image(.....) -- difference between output and LR
-itorch.image(scaled) -- upscaled LR
---itorch.image(scaledbl) -- upscaled(bilinear) LR
---itorch.image(scaledbc) -- upscaled(bicubic) LR
-itorch.image(test) -- output 
-itorch.image(gt) -- HR
---itorch.image(diff) -- difference between output and HR
---]]
-
---[[
-itorch.image({image.crop(scaled, 'bl', gt:size(3)/2, gt:size(2)/2),image.crop(scaledbc, 'bl', gt:size(3)/2, gt:size(2)/2)})
-itorch.image({image.crop(gt, 'bl', gt:size(3)/2, gt:size(2)/2),image.crop(test, 'bl', gt:size(3)/2, gt:size(2)/2)})
-itorch.image(diff) -- difference between output and HR
-itorch.image(diff2) -- difference between output and upscaleBC
---]]
