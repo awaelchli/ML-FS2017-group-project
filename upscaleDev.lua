@@ -11,11 +11,10 @@ nngraph.setDebug(true)
 logger = optim.Logger('loss_log.txt')
 
 -- Load data
-
 images = load_images.load('datasets/Set14/image_SRF_4/', 'png', false)
 inputChannels = 3
 
--- Convert greyscale images
+-- Convert greyscale images to RGB
 for i = 1, #images do
         images[i] = images[i]:expand(inputChannels, images[i]:size(2), images[i]:size(3))
 end
@@ -31,26 +30,45 @@ for i = 1, n do
 end
 
 -- Make network
---[[
 upscaleFactor = 4
+if(false) then
+    net1 = nn.Sequential()
+    net1:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
+    net1:add(nn.ReLU())
+    net1:add(nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1))
+    net1:add(nn.ReLU())
+    net1:add(nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2))
+    net1:add(nn.ReLU())
+    net1:add(nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1))
+    net1:add(nn.PixelShuffle(upscaleFactor))
 
-net = nn.Sequential()
-net:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
-net:add(nn.ReLU())
-net:add(nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1))
-net:add(nn.ReLU())
-net:add(nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2))
-net:add(nn.ReLU())
-net:add(nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1))
-net:add(nn.PixelShuffle(upscaleFactor))
+    innerNet = nn.Sequential()
+    innerNet:add(nn.SpatialConvolution(3, 3, 5, 5, 1, 1, 2, 2))
 
---net:add(nn.SpatialFullConvolution(32, 3, 9, 9, upscaleFactor, upscaleFactor, 3, 3, 1, 1))
+    resNet = nn.ConcatTable()
+    resNet:add(nn.Identity())
+    resNet.add(innerNet)
 
---graph.dot(net.fg, 'cnn1', 'cnn1')
-]]
+    net = nn.Sequential()
+    net:add(net1)
+    net:add(resNet)
+    net:add(nn.CAddTable())
 
--- Load network from disk
-net = torch.load("upscaleDeConv.model")
+    --net = nn.gModule({net1}, {output2})
+    --graph.dot(net.fg, 'res_net', 'res_net')
+
+
+    out = net:forward(imagesLR[1])
+    print(out:size())
+
+    image.save('res_test.png', out)
+
+    --net:add(nn.SpatialFullConvolution(32, 3, 9, 9, upscaleFactor, upscaleFactor, 3, 3, 1, 1))
+    --graph.dot(net.fg, 'cnn1', 'cnn1')
+else
+    -- Load network from disk
+    net = torch.load("upscaleDeConv.model")
+end
 
 -- Train network
 
@@ -91,7 +109,7 @@ sgd_params = {
    momentum = 0
 }
 
-for i = 1,200 do
+for i = 1,1000 do
 
    -- this variable is used to estimate the average loss
    current_loss = 0

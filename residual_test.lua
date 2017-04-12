@@ -35,7 +35,8 @@ output2 = {input, output1} - nn.CAddTable()
 
 net = nn.gModule({input}, {output2})
 
-graph.dot(net.fg, 'res_net', 'res_net')
+--graph.dot(net.fg, 'res_net', 'res_net')
+
 
 
 out = net:forward(imagesLR[1])
