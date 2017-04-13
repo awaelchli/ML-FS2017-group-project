@@ -5,8 +5,8 @@ require 'load_images'
 require 'torch'
 require 'optim'
 require 'gnuplot'
-require 'rnn'
-require 'dpnn'
+--require 'rnn'
+--require 'dpnn'
 
 -- Set up Logger
 
@@ -37,36 +37,40 @@ upscaleFactor = 4
 num_recursions = 5
 
 if(true) then
-    net1 = nn.Sequential()
-    net1:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.PixelShuffle(upscaleFactor))
+    upscaleNet = nn.Sequential()
+    upscaleNet:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
+    upscaleNet:add(nn.ReLU())
+    upscaleNet:add(nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1))
+    upscaleNet:add(nn.ReLU())
+    upscaleNet:add(nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2))
+    upscaleNet:add(nn.ReLU())
+    upscaleNet:add(nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1))
+    upscaleNet:add(nn.PixelShuffle(upscaleFactor))
 
-    innerNet = nn.Sequential()
-    innerNet:add(nn.SpatialConvolution(3, 32, 5, 5, 1, 1, 2, 2))
-    innerNet:add(nn.ReLU())
-    innerNet:add(nn.SpatialConvolution(32, 3, 5, 5, 1, 1, 2, 2))
-    innerNet:add(nn.ReLU())
+    residualProcessNet = nn.Sequential()
+    residualProcessNet:add(nn.SpatialConvolution(3, 8, 5, 5, 1, 1, 2, 2))
+    residualProcessNet:add(nn.ReLU())
+    residualProcessNet:add(nn.SpatialConvolution(8, 3, 5, 5, 1, 1, 2, 2))
+    residualProcessNet:add(nn.ReLU())
 
-    resNet = nn.ConcatTable()
-    resNet:add(nn.Identity())
-    resNet.add(innerNet)
+    residualFeedNet = nn.ConcatTable()
+    residualFeedNet:add(nn.Identity())
+    residualFeedNet:add(residualProcessNet)
 
-    inside_recurrent = nn.Sequential()
-    inside_recurrent:add(resNet)
-    inside_recurrent:add(nn.CAddTable())
-
-    recurrent = nn.Recurrent(nn.Identity(), inside_recurrent, nn.Identity(), nn.Identity(), num_recursions)
-    print(recurrent)
+    recurrenceNet = nn.Sequential()
+    recurrenceNet:add(residualFeedNet)
+    recurrenceNet:add(nn.CAddTable())
+    recurrenceNet:getParameters() --flatten the parameters of the whole container
 
     net = nn.Sequential()
-    net:add(net1)
-    net:add(recurrent)
+    net:add(upscaleNet)
+    net:add(recurrenceNet)
+    
+    for i=2,num_recursions do
+    	net:add(recurrenceNet:clone('weight','bias','gradWeight','gradBias'))
+    end
+    
+    net:getParameters() --flatten the parameters of the whole network
 
     --net = recurrent
     --g = nn.gModule({net})
@@ -84,6 +88,8 @@ else
     -- Load network from disk
     net = torch.load("upscaleDeConv.model")
 end
+
+savenet = net:clone('weight','bias')
 
 -- Train network
 
@@ -124,7 +130,7 @@ sgd_params = {
    momentum = 0
 }
 
-for i = 1,1000 do
+for i = 1,100 do
 
    -- this variable is used to estimate the average loss
    current_loss = 0
@@ -153,7 +159,7 @@ for i = 1,1000 do
 end
 
 -- [[
-torch.save("upscaleDeConv.model", net)
+torch.save("upscaleDeConv.model", savenet)
 print("Model saved")
 --]]
 print("finished")
