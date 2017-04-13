@@ -4,6 +4,7 @@ require 'nngraph'
 require 'load_images'
 require 'torch'
 require 'optim'
+require 'gnuplot'
 
 -- Set up Logger
 
@@ -31,7 +32,8 @@ end
 
 -- Make network
 upscaleFactor = 4
-if(false) then
+
+if(true) then
     net1 = nn.Sequential()
     net1:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
     net1:add(nn.ReLU())
@@ -43,7 +45,9 @@ if(false) then
     net1:add(nn.PixelShuffle(upscaleFactor))
 
     innerNet = nn.Sequential()
-    innerNet:add(nn.SpatialConvolution(3, 3, 5, 5, 1, 1, 2, 2))
+    innerNet:add(nn.SpatialConvolution(3, 32, 5, 5, 1, 1, 2, 2))
+    innerNet:add(nn.ReLU())
+    innerNet:add(nn.SpatialConvolution(32, 3, 5, 5, 1, 1, 2, 2))
 
     resNet = nn.ConcatTable()
     resNet:add(nn.Identity())
@@ -54,8 +58,8 @@ if(false) then
     net:add(resNet)
     net:add(nn.CAddTable())
 
-    --net = nn.gModule({net1}, {output2})
-    --graph.dot(net.fg, 'res_net', 'res_net')
+    --g = nn.gModule({net})
+    --graph.dot(g.fg, 'upscale_resnet', 'upscale_resnet')
 
 
     out = net:forward(imagesLR[1])
@@ -103,8 +107,8 @@ feval = function(x_new)
 end
 
 sgd_params = {
-   learningRate = 1e-3,
-   learningRateDecay = 0, --1e-4,
+   learningRate = 1e-1,
+   learningRateDecay = 1e-2,
    weightDecay = 0,
    momentum = 0
 }
