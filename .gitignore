@@ -7,3 +7,4 @@ loss_log.txt
 /upscaleDeConv.model
 /RSRCNN.dot
 /RSRCNN.svg
+*.png

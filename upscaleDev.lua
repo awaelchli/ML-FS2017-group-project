@@ -33,10 +33,11 @@ for i = 1, n do
 end
 
 -- Make network
+createNewNetwork = false
 upscaleFactor = 4
 num_recursions = 5
 
-if(true) then
+if(createNewNetwork) then
 	local gStart, gEnd
 	
     upscaleNet = {}
@@ -86,23 +87,34 @@ if(true) then
     
 
     net = nn.gModule({gStart},{gEnd})
-    net:getParameters() --flatten the parameters of the whole network
-    savenet = net:clone('weight','bias')
+    --[[
+    savenet = net:clone('weight','bias','gradWeight','gradBias')
+    cont = nn.Container()
+    cont:add(net)
+    cont:add(savenet)
+    cont:getParameters() --flatten the parameters of the whole network
+    --]]
+    print('created network')
+else
+    -- Load network from disk
+    net = torch.load("upscaleDeConv.model")
+    --[[
+    savenet = net:clone('weight','bias','gradWeight','gradBias')
+    cont = nn.Container()
+    cont:add(net)
+    cont:add(savenet)
+    cont:getParameters() --flatten the parameters of the whole network
+    --]]
+    print('loaded network')
+end
 
 -- [[
     out = net:forward(imagesLR[1])
     print(out:size())
 
-    image.save('res_test.png', out)
+    image.save('pre_test.png', out)
 --]]    
     graph.dot(net.fg, 'RSRCNN', 'RSRCNN')
-else
-    -- Load network from disk
-    net = torch.load("upscaleDeConv.model")
-    net:getParameters() --flatten the parameters of the whole network
-    savenet = net:clone('weight','bias')
-end
-
 
 -- Train network
 
@@ -138,48 +150,52 @@ end
 
 sgd_params = {
    learningRate = 1e-1,
-   learningRateDecay = 1e-2,
+   learningRateDecay = 3.5e-3,
    weightDecay = 0,
    momentum = 0
 }
 
-for i = 1,10 do
+print(os.date("start loop %y.%m.%d %H:%M:%S aka ")..os.time())
+for i = 1,120 do
 
-   -- this variable is used to estimate the average loss
-   current_loss = 0
-
-   -- an epoch is a full loop over our training data
-   for i = 1, #imagesHR do
-      
-      _,fs = optim.sgd(feval,x,sgd_params)
-
-
-      current_loss = current_loss + fs[1]
-   end
-
-   -- report average error on epoch
-   current_loss = current_loss / #imagesHR
-   
-    --if i%10 == 0 then
-        print('i'..i..' loss = ' .. current_loss)
-    --end
-   
-   logger:add{['training error'] = current_loss}
-   logger:style{['training error'] = '-'}
-   if i%100 == 0 then
-   logger:plot()  
-   end
+	-- this variable is used to estimate the average loss
+	current_loss = 0
+	
+	-- an epoch is a full loop over our training data
+	for i = 1, #imagesHR do
+		_,fs = optim.sgd(feval,x,sgd_params)
+		
+		current_loss = current_loss + fs[1]
+	end
+	
+	-- report average error on epoch
+	current_loss = current_loss / #imagesHR
+	
+	--if i%10 == 0 then
+	print('i'..i..' loss = ' .. current_loss)
+	--end
+	
+	logger:add{['training error'] = current_loss}
+	logger:style{['training error'] = '-'}
+	if i%100 == 0 then
+		logger:plot()  
+	end
+	if i%5 == 0 then
+		out = net:forward(imagesLR[1])
+		image.save('testpics/test_'..os.time()..'.png', out)
+	end
 end
+print(os.date("end loop %y.%m.%d %H:%M:%S aka ")..os.time())
 
 -- [[
-torch.save("upscaleDeConv.model", savenet)
+torch.save("upscaleDeConv.model", net)
 print("Model saved")
 --]]
 print("finished")
 
 -- Test example
 
-imgselector = 7
+imgselector = 1
 
 local origin = imagesLR[imgselector]
 local gt = imagesHR[imgselector]
@@ -191,4 +207,4 @@ local scaledbc = image.scale(origin, gt:size(3), gt:size(2), 'bicubic') -- upsca
 local diff = torch.add(gt, -1, test)
 local diff2 = torch.add(scaledbc, -1, test)
 --]]
-image.save("test.png", test)
+image.save("post_test.png", test)
