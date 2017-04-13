@@ -1,14 +1,16 @@
 
 require 'nn'
-require 'nngraph'
+--require 'nngraph'
 require 'load_images'
 require 'torch'
 require 'optim'
 require 'gnuplot'
+require 'rnn'
+require 'dpnn'
 
 -- Set up Logger
 
-nngraph.setDebug(true)
+--nngraph.setDebug(true)
 logger = optim.Logger('loss_log.txt')
 
 -- Load data
@@ -32,6 +34,7 @@ end
 
 -- Make network
 upscaleFactor = 4
+num_recursions = 5
 
 if(true) then
     net1 = nn.Sequential()
@@ -48,16 +51,24 @@ if(true) then
     innerNet:add(nn.SpatialConvolution(3, 32, 5, 5, 1, 1, 2, 2))
     innerNet:add(nn.ReLU())
     innerNet:add(nn.SpatialConvolution(32, 3, 5, 5, 1, 1, 2, 2))
+    innerNet:add(nn.ReLU())
 
     resNet = nn.ConcatTable()
     resNet:add(nn.Identity())
     resNet.add(innerNet)
 
+    inside_recurrent = nn.Sequential()
+    inside_recurrent:add(resNet)
+    inside_recurrent:add(nn.CAddTable())
+
+    recurrent = nn.Recurrent(nn.Identity(), inside_recurrent, nn.Identity(), nn.Identity(), num_recursions)
+    print(recurrent)
+
     net = nn.Sequential()
     net:add(net1)
-    net:add(resNet)
-    net:add(nn.CAddTable())
+    net:add(recurrent)
 
+    --net = recurrent
     --g = nn.gModule({net})
     --graph.dot(g.fg, 'upscale_resnet', 'upscale_resnet')
 
