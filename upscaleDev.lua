@@ -34,7 +34,7 @@ end
 
 -- Make network
 upscaleFactor = 4
-num_recursions = 5
+num_recursions = 2
 
 if(true) then
     upscaleNet = nn.Sequential()
@@ -49,9 +49,9 @@ if(true) then
 
     residualProcessNet = nn.Sequential()
     residualProcessNet:add(nn.SpatialConvolution(3, 8, 5, 5, 1, 1, 2, 2))
-    residualProcessNet:add(nn.ReLU())
+    residualProcessNet:add(nn.ReLU(true))
     residualProcessNet:add(nn.SpatialConvolution(8, 3, 5, 5, 1, 1, 2, 2))
-    residualProcessNet:add(nn.ReLU())
+    residualProcessNet:add(nn.ReLU(true))
 
     residualFeedNet = nn.ConcatTable()
     residualFeedNet:add(nn.Identity())
@@ -89,7 +89,7 @@ else
     net = torch.load("upscaleDeConv.model")
 end
 
-savenet = net:clone('weight','bias')
+--savenet = net:clone('weight','bias')
 
 -- Train network
 
@@ -130,7 +130,7 @@ sgd_params = {
    momentum = 0
 }
 
-for i = 1,100 do
+for i = 1,10 do
 
    -- this variable is used to estimate the average loss
    current_loss = 0
@@ -158,8 +158,8 @@ for i = 1,100 do
    end
 end
 
--- [[
-torch.save("upscaleDeConv.model", savenet)
+--[[
+torch.save("upscaleDeConv.model", net)
 print("Model saved")
 --]]
 print("finished")
