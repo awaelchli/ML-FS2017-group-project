@@ -1,10 +1,10 @@
 
-require 'nn'
---require 'nngraph'
 require 'load_images'
 require 'torch'
 require 'optim'
 require 'gnuplot'
+require 'nn'
+require 'nngraph'
 --require 'rnn'
 --require 'dpnn'
 
@@ -37,58 +37,72 @@ upscaleFactor = 4
 num_recursions = 5
 
 if(true) then
-    upscaleNet = nn.Sequential()
-    upscaleNet:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
-    upscaleNet:add(nn.ReLU())
-    upscaleNet:add(nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1))
-    upscaleNet:add(nn.ReLU())
-    upscaleNet:add(nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2))
-    upscaleNet:add(nn.ReLU())
-    upscaleNet:add(nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1))
-    upscaleNet:add(nn.PixelShuffle(upscaleFactor))
+	local gStart, gEnd
+	
+    upscaleNet = {}
+    upscaleNet[1] = nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1)
+    gStart = upscaleNet[1]()
+    gEnd = gStart
+    upscaleNet[2] = nn.ReLU()
+    gEnd = upscaleNet[2](gEnd)
+    upscaleNet[3] = nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1)
+    gEnd = upscaleNet[3](gEnd)
+    upscaleNet[4] = nn.ReLU()
+    gEnd = upscaleNet[4](gEnd)
+    upscaleNet[5] = nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2)
+    gEnd = upscaleNet[5](gEnd)
+    upscaleNet[6] = nn.ReLU()
+    gEnd = upscaleNet[6](gEnd)
+    upscaleNet[7] = nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1)
+    gEnd = upscaleNet[7](gEnd)
+    upscaleNet[8] = nn.PixelShuffle(upscaleFactor)
+    gEnd = upscaleNet[8](gEnd)
 
-    residualProcessNet = nn.Sequential()
-    residualProcessNet:add(nn.SpatialConvolution(3, 5, 5, 5, 1, 1, 2, 2))
-    residualProcessNet:add(nn.ReLU())
-    residualProcessNet:add(nn.SpatialConvolution(5, 3, 5, 5, 1, 1, 2, 2))
-
-    residualFeedNet = nn.ConcatTable()
-    residualFeedNet:add(nn.Identity())
-    residualFeedNet:add(residualProcessNet)
-
-    recurrenceNet = nn.Sequential()
-    recurrenceNet:add(residualFeedNet)
-    recurrenceNet:add(nn.CAddTable())
-    recurrenceNet:getParameters() --flatten the parameters of the whole container
-
-    net = nn.Sequential()
-    net:add(upscaleNet)
-    net:add(recurrenceNet)
+    local gThread = {}
+    residualNet = {}
+    residualNet[1] = {}
+    residualNet[1][1] = nn.SpatialConvolution(3, 5, 5, 5, 1, 1, 2, 2)
+    gThread[1] = residualNet[1][1](gEnd)
+    residualNet[1][2] = nn.ReLU()
+    gThread[1] = residualNet[1][2](gThread[1])
+    residualNet[1][3] = nn.SpatialConvolution(5, 3, 5, 5, 1, 1, 2, 2)
+    gThread[1] = residualNet[1][3](gThread[1])
+    residualNet[1][4] = nn.CAddTable()
+    gThread[1] = residualNet[1][4]({gEnd, gThread[1]})
+    gEnd = gThread[1]
     
     for i=2,num_recursions do
-    	net:add(recurrenceNet:clone('weight','bias','gradWeight','gradBias'))
+    	residualNet[i] = {}
+		residualNet[i][1] = residualNet[1][1]:clone('weight','bias','gradWeight','gradBias')
+		gThread[i] = residualNet[i][1](gEnd)
+		residualNet[i][2] = nn.ReLU()
+		gThread[i] = residualNet[i][2](gThread[i])
+		residualNet[i][3] = residualNet[1][3]:clone('weight','bias','gradWeight','gradBias')
+		gThread[i] = residualNet[i][3](gThread[i])
+		residualNet[i][4] = nn.CAddTable()
+		gThread[i] = residualNet[i][4]({gEnd, gThread[i]})
+		gEnd = gThread[i]
     end
     
+
+    net = nn.gModule({gStart},{gEnd})
     net:getParameters() --flatten the parameters of the whole network
+    savenet = net:clone('weight','bias')
 
-    --net = recurrent
-    --g = nn.gModule({net})
-    --graph.dot(g.fg, 'upscale_resnet', 'upscale_resnet')
-
---[[
+-- [[
     out = net:forward(imagesLR[1])
     print(out:size())
 
     image.save('res_test.png', out)
-]]
-    --net:add(nn.SpatialFullConvolution(32, 3, 9, 9, upscaleFactor, upscaleFactor, 3, 3, 1, 1))
-    --graph.dot(net.fg, 'cnn1', 'cnn1')
+--]]    
+    graph.dot(net.fg, 'RSRCNN', 'RSRCNN')
 else
     -- Load network from disk
     net = torch.load("upscaleDeConv.model")
+    net:getParameters() --flatten the parameters of the whole network
+    savenet = net:clone('weight','bias')
 end
 
-savenet = net:clone('weight','bias')
 
 -- Train network
 
