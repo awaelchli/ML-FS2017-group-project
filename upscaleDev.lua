@@ -32,6 +32,15 @@ for i = 1, n do
 	imagesHR[i] = images[2 * i - 1]
 end
 
+--local inputAttr = {color = 'gold', shape = 'box', style = 'bold,rounded,filled', fillcolor = 'whitesmoke'}
+--local splitAttr = {color = 'darkgoldenrod', shape = 'box', style = 'bold,rounded,filled,dotted', fillcolor = 'whitesmoke'}
+local joinAttr = {color = 'darkgoldenrod', shape = 'box', style = 'bold,rounded,filled,dashed', fillcolor = 'whitesmoke'}
+--local unsqueezeAttr = {color = 'darkgoldenrod', shape = 'box', style = 'bold,rounded,filled', fillcolor = 'whitesmoke'}
+local convAttr = {color = 'lawngreen', shape = 'box', style = 'bold,rounded,filled', fillcolor = 'whitesmoke'}
+local deConvAttr = {color = 'blue', shape = 'box', style = 'bold,rounded,filled', fillcolor = 'whitesmoke'}
+local reluAttr = {color = 'darkviolet', shape = 'box', style = 'bold,rounded,filled', fillcolor = 'whitesmoke'}
+--local poolAttr = {color = 'crimson', shape = 'box', style = 'bold,rounded,filled', fillcolor = 'whitesmoke'}
+
 -- Make network
 createNewNetwork = false
 upscaleFactor = 4
@@ -42,46 +51,46 @@ if(createNewNetwork) then
 	
     upscaleNet = {}
     upscaleNet[1] = nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1)
-    gStart = upscaleNet[1]()
+    gStart = upscaleNet[1]():annotate{name = 'Upscale', graphAttributes = convAttr}
     gEnd = gStart
     upscaleNet[2] = nn.ReLU()
-    gEnd = upscaleNet[2](gEnd)
+    gEnd = upscaleNet[2](gEnd):annotate{name = 'Upscale', graphAttributes = reluAttr}
     upscaleNet[3] = nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1)
-    gEnd = upscaleNet[3](gEnd)
+    gEnd = upscaleNet[3](gEnd):annotate{name = 'Upscale', graphAttributes = convAttr}
     upscaleNet[4] = nn.ReLU()
-    gEnd = upscaleNet[4](gEnd)
+    gEnd = upscaleNet[4](gEnd):annotate{name = 'Upscale', graphAttributes = reluAttr}
     upscaleNet[5] = nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2)
-    gEnd = upscaleNet[5](gEnd)
+    gEnd = upscaleNet[5](gEnd):annotate{name = 'Upscale', graphAttributes = convAttr}
     upscaleNet[6] = nn.ReLU()
-    gEnd = upscaleNet[6](gEnd)
+    gEnd = upscaleNet[6](gEnd):annotate{name = 'Upscale', graphAttributes = reluAttr}
     upscaleNet[7] = nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1)
-    gEnd = upscaleNet[7](gEnd)
+    gEnd = upscaleNet[7](gEnd):annotate{name = 'Upscale', graphAttributes = convAttr}
     upscaleNet[8] = nn.PixelShuffle(upscaleFactor)
-    gEnd = upscaleNet[8](gEnd)
+    gEnd = upscaleNet[8](gEnd):annotate{name = 'Upscale', graphAttributes = deConvAttr}
 
     local gThread = {}
     residualNet = {}
     residualNet[1] = {}
     residualNet[1][1] = nn.SpatialConvolution(3, 5, 5, 5, 1, 1, 2, 2)
-    gThread[1] = residualNet[1][1](gEnd)
+    gThread[1] = residualNet[1][1](gEnd):annotate{name = 'Recurrent 1', graphAttributes = convAttr}
     residualNet[1][2] = nn.ReLU()
-    gThread[1] = residualNet[1][2](gThread[1])
+    gThread[1] = residualNet[1][2](gThread[1]):annotate{name = 'Recurrent 1', graphAttributes = reluAttr}
     residualNet[1][3] = nn.SpatialConvolution(5, 3, 5, 5, 1, 1, 2, 2)
-    gThread[1] = residualNet[1][3](gThread[1])
+    gThread[1] = residualNet[1][3](gThread[1]):annotate{name = 'Recurrent 1', graphAttributes = convAttr}
     residualNet[1][4] = nn.CAddTable()
-    gThread[1] = residualNet[1][4]({gEnd, gThread[1]})
+    gThread[1] = residualNet[1][4]({gEnd, gThread[1]}):annotate{name = 'Recurrent 1', graphAttributes = joinAttr}
     gEnd = gThread[1]
     
     for i=2,num_recursions do
     	residualNet[i] = {}
 		residualNet[i][1] = residualNet[1][1]:clone('weight','bias','gradWeight','gradBias')
-		gThread[i] = residualNet[i][1](gEnd)
+		gThread[i] = residualNet[i][1](gEnd):annotate{name = 'Recurrent '..i, graphAttributes = convAttr}
 		residualNet[i][2] = nn.ReLU()
-		gThread[i] = residualNet[i][2](gThread[i])
+		gThread[i] = residualNet[i][2](gThread[i]):annotate{name = 'Recurrent '..i, graphAttributes = reluAttr}
 		residualNet[i][3] = residualNet[1][3]:clone('weight','bias','gradWeight','gradBias')
-		gThread[i] = residualNet[i][3](gThread[i])
+		gThread[i] = residualNet[i][3](gThread[i]):annotate{name = 'Recurrent '..i, graphAttributes = convAttr}
 		residualNet[i][4] = nn.CAddTable()
-		gThread[i] = residualNet[i][4]({gEnd, gThread[i]})
+		gThread[i] = residualNet[i][4]({gEnd, gThread[i]}):annotate{name = 'Recurrent '..i, graphAttributes = joinAttr}
 		gEnd = gThread[i]
     end
     
@@ -149,7 +158,7 @@ feval = function(x_new)
 end
 
 sgd_params = {
-   learningRate = 1e-1,
+   learningRate = 5e-3,
    learningRateDecay = 3.5e-3,
    weightDecay = 0,
    momentum = 0
@@ -177,7 +186,7 @@ for i = 1,120 do
 	
 	logger:add{['training error'] = current_loss}
 	logger:style{['training error'] = '-'}
-	if i%100 == 0 then
+	if i%20 == 0 then
 		logger:plot()  
 	end
 	if i%5 == 0 then
