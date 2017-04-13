@@ -34,7 +34,7 @@ end
 
 -- Make network
 upscaleFactor = 4
-num_recursions = 2
+num_recursions = 5
 
 if(true) then
     upscaleNet = nn.Sequential()
@@ -48,10 +48,9 @@ if(true) then
     upscaleNet:add(nn.PixelShuffle(upscaleFactor))
 
     residualProcessNet = nn.Sequential()
-    residualProcessNet:add(nn.SpatialConvolution(3, 8, 5, 5, 1, 1, 2, 2))
-    residualProcessNet:add(nn.ReLU(true))
-    residualProcessNet:add(nn.SpatialConvolution(8, 3, 5, 5, 1, 1, 2, 2))
-    residualProcessNet:add(nn.ReLU(true))
+    residualProcessNet:add(nn.SpatialConvolution(3, 5, 5, 5, 1, 1, 2, 2))
+    residualProcessNet:add(nn.ReLU())
+    residualProcessNet:add(nn.SpatialConvolution(5, 3, 5, 5, 1, 1, 2, 2))
 
     residualFeedNet = nn.ConcatTable()
     residualFeedNet:add(nn.Identity())
@@ -76,12 +75,12 @@ if(true) then
     --g = nn.gModule({net})
     --graph.dot(g.fg, 'upscale_resnet', 'upscale_resnet')
 
-
+--[[
     out = net:forward(imagesLR[1])
     print(out:size())
 
     image.save('res_test.png', out)
-
+]]
     --net:add(nn.SpatialFullConvolution(32, 3, 9, 9, upscaleFactor, upscaleFactor, 3, 3, 1, 1))
     --graph.dot(net.fg, 'cnn1', 'cnn1')
 else
@@ -89,7 +88,7 @@ else
     net = torch.load("upscaleDeConv.model")
 end
 
---savenet = net:clone('weight','bias')
+savenet = net:clone('weight','bias')
 
 -- Train network
 
@@ -158,8 +157,8 @@ for i = 1,10 do
    end
 end
 
---[[
-torch.save("upscaleDeConv.model", net)
+-- [[
+torch.save("upscaleDeConv.model", savenet)
 print("Model saved")
 --]]
 print("finished")
