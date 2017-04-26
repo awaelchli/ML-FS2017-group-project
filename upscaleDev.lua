@@ -61,17 +61,24 @@ if(true) then
     inside_recurrent:add(resNet)
     inside_recurrent:add(nn.CAddTable())
 
-    recurrent = nn.Recurrent(nn.Identity(), inside_recurrent, nn.Identity(), nn.Identity(), num_recursions)
-    print(recurrent)
+    recurrent = nn.Recurrent(
+        nn.Identity(),      -- start
+        nn.Identity(),      -- input transform 
+        inside_recurrent,   -- hidden network 
+        nn.Identity(),      -- feedback
+        num_recursions      -- rho
+    )
+
+    -- decorator, recursively apply to the same input (not multiple inputs)
+    rnn = nn.Repeater(recurrent, num_recursions)
+
+    --print(recurrent)
+    --print(rnn)
 
     net = nn.Sequential()
     net:add(net1)
-    net:add(recurrent)
-
-    --net = recurrent
-    --g = nn.gModule({net})
-    --graph.dot(g.fg, 'upscale_resnet', 'upscale_resnet')
-
+    net:add(rnn)
+    net:add(nn.SelectTable(num_recursions)) -- select last output from RNN
 
     out = net:forward(imagesLR[1])
     print(out:size())
