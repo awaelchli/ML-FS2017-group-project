@@ -13,6 +13,9 @@ require 'dpnn'
 
 --nngraph.setDebug(true)
 logger = optim.Logger('loss_log.txt')
+loggerGrad = optim.Logger('grad_norm_log.txt')
+loggerGrad:setNames{'Gradient norm'}
+loggerGrad:style{'-'}
 
 -- Load data
 images = load_images.load('datasets/Set14/image_SRF_4/', 'png', false)
@@ -50,8 +53,8 @@ end
 saveNet = net:clone('weight','bias','gradWeight','gradBias')
 saveNet:clearState() --if it wasn't clean, clean it
 netUnion = nn.Container()
-netUnion:add(self.module)
-netUnion:add(self.saveModule)
+netUnion:add(net)
+netUnion:add(saveNet)
 x, dl_dx = netUnion:getParameters()
 
 -- Train network
@@ -108,14 +111,21 @@ for i = 1,1000 do
    -- report average error on epoch
    current_loss = current_loss / #imagesHR
    
+   current_abs_grad = torch.norm( dl_dx )
+   
     --if i%10 == 0 then
-        print('i'..i..' loss = ' .. current_loss)
+        print('i'..i..' loss = ' .. current_loss .. ' grad norm = ' .. current_abs_grad)
     --end
    
    logger:add{['training error'] = current_loss}
    logger:style{['training error'] = '-'}
-   if i%100 == 0 then
+   if i%10 == 0 then
    logger:plot()  
+   end
+   
+   loggerGrad:add{current_abs_grad}
+   if i%10 == 0 then
+   	loggerGrad:plot()
    end
 end
 
