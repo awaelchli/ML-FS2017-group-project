@@ -1,7 +1,5 @@
 .ipynb_checkpoints/*
 *~
 *.eps
-loss_log.txt
-/loss_log.txt
-/test.png
-/upscaleDeConv.model
+logs/*
+out/*

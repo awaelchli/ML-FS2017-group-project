@@ -9,12 +9,19 @@ require 'optim'
 require 'gnuplot'
 require 'rnn'
 require 'dpnn'
+require 'paths'
+
+
+-- Setup environment
+paths.mkdir('logs')
+paths.mkdir('out')
 
 -- Set up Logger
 
 --nngraph.setDebug(true)
-logger = optim.Logger('loss_log.txt')
-loggerGrad = optim.Logger('grad_norm_log.txt')
+
+logger = optim.Logger('logs/loss_log.txt')
+loggerGrad = optim.Logger('logs/grad_norm_log.txt')
 loggerGrad:setNames{'Gradient norm'}
 loggerGrad:style{'-'}
 
@@ -57,7 +64,7 @@ if(true) then
     print(out:size())
 else
     -- Load network from disk
-    net = torch.load("upscaleDeConv.model")
+    net = torch.load("out/upscaleDeConv.model")
 end
 
 saveNet = net:clone('weight','bias','gradWeight','gradBias')
@@ -104,7 +111,7 @@ sgd_params = {
    momentum = 0
 }
 
-for i = 1,1000 do
+for i = 1, 1000 do
 
    -- this variable is used to estimate the average loss
    current_loss = 0
@@ -140,7 +147,7 @@ for i = 1,1000 do
 end
 
 -- [[
-torch.save("upscaleDeConv.model", saveNet)
+torch.save("out/upscaleDeConv.model", saveNet)
 print("Model saved")
 --]]
 print("finished")
@@ -159,4 +166,4 @@ local scaledbc = image.scale(origin, gt:size(3), gt:size(2), 'bicubic') -- upsca
 local diff = torch.add(gt, -1, test)
 local diff2 = torch.add(scaledbc, -1, test)
 --]]
-image.save("test.png", test)
+image.save("out/test.png", test)
