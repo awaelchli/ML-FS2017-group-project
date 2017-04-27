@@ -3,6 +3,7 @@ require 'nn'
 --require 'nngraph'
 require 'load_images'
 require 'build_network'
+require 'split_data'
 require 'torch'
 require 'optim'
 require 'gnuplot'
@@ -25,13 +26,22 @@ end
 
 n = #images / 2
 
-imagesLR = {}--images:select()
-imagesHR = {}--images[2]
+imagesLR = {}
+imagesHR = {}
 
 for i = 1, n do
 	imagesLR[i] = images[2 * i]
 	imagesHR[i] = images[2 * i - 1]
 end
+
+data = {}
+data.HR = imagesHR
+data.LR = imagesLR
+data.size = function()
+    return #data.LR
+end
+
+train, validation, test = split_data(data, 0.8, 0.1)
 
 -- Make network
 upscaleFactor = 4
