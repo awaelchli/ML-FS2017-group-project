@@ -2,6 +2,7 @@
 require 'nn'
 --require 'nngraph'
 require 'load_images'
+require 'build_network'
 require 'torch'
 require 'optim'
 require 'gnuplot'
@@ -37,56 +38,10 @@ upscaleFactor = 4
 num_recursions = 5
 
 if(true) then
-    net1 = nn.Sequential()
-    net1:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.PixelShuffle(upscaleFactor))
-
-    innerNet = nn.Sequential()
-    innerNet:add(nn.SpatialConvolution(3, 32, 5, 5, 1, 1, 2, 2))
-    innerNet:add(nn.ReLU())
-    innerNet:add(nn.SpatialConvolution(32, 3, 5, 5, 1, 1, 2, 2))
-    innerNet:add(nn.ReLU())
-
-    resNet = nn.ConcatTable()
-    resNet:add(nn.Identity())
-    resNet.add(innerNet)
-
-    inside_recurrent = nn.Sequential()
-    inside_recurrent:add(resNet)
-    inside_recurrent:add(nn.CAddTable())
-
-    recurrent = nn.Recurrent(
-        nn.Identity(),      -- start
-        nn.Identity(),      -- input transform 
-        inside_recurrent,   -- hidden network 
-        nn.Identity(),      -- feedback
-        num_recursions      -- rho
-    )
-
-    -- decorator, recursively apply to the same input (not multiple inputs)
-    rnn = nn.Repeater(recurrent, num_recursions)
-
-    --print(recurrent)
-    --print(rnn)
-
-    net = nn.Sequential()
-    net:add(net1)
-    net:add(rnn)
-    net:add(nn.SelectTable(num_recursions)) -- select last output from RNN
+    net = build_network(inputChannels, upscaleFactor, num_recursions)
 
     out = net:forward(imagesLR[1])
     print(out:size())
-
-    image.save('res_test.png', out)
-
-    --net:add(nn.SpatialFullConvolution(32, 3, 9, 9, upscaleFactor, upscaleFactor, 3, 3, 1, 1))
-    --graph.dot(net.fg, 'cnn1', 'cnn1')
 else
     -- Load network from disk
     net = torch.load("upscaleDeConv.model")
