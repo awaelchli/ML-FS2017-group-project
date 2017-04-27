@@ -11,6 +11,7 @@ function split_data(data, trainRatio, validationRatio)
     local fill_split = function(data, split, range) 
         split.HR = {} 
         split.LR = {}
+        split.size = function() return range end
 
         for i = 1, range do
             split.HR[i] = data.HR[i]

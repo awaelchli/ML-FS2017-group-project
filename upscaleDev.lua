@@ -16,11 +16,9 @@ require 'paths'
 -- Setup environment
 paths.mkdir('logs')
 paths.mkdir('out')
-
--- Set up Logger
-
 --nngraph.setDebug(true)
 
+-- Set up Logger
 logger = optim.Logger('logs/loss_log.txt')
 loggerGrad = optim.Logger('logs/grad_norm_log.txt')
 loggerGrad:setNames{'Gradient norm'}
@@ -64,19 +62,17 @@ feval = function(x_new)
 
     -- select a new training sample
     _nidx_ = (_nidx_ or 0) + 1
-    if _nidx_ > data.size() then _nidx_ = 1 end
+    if _nidx_ > train.size() then _nidx_ = 1 end
 
-    --local sample = data[_nidx_]
-    local target = data.HR[_nidx_]      -- this funny looking syntax allows
-    local inputs = data.LR[_nidx_]    -- slicing of arrays.
+    local target = train.HR[_nidx_]
+    local input = train.LR[_nidx_]
 
-    -- reset gradients (gradients are always accumulated, to accommodate 
-    -- batch methods)
+    -- reset gradients (gradients are always accumulated, to accommodate batch methods)
     dl_dx:zero()
 
     -- evaluate the loss function and its derivative wrt x, for that sample
-    local loss_x = criterion:forward(net:forward(inputs), target)
-    net:backward(inputs, criterion:backward(net.output, target))
+    local loss_x = criterion:forward(net:forward(input), target)
+    net:backward(input, criterion:backward(net.output, target))
 
     -- return loss(x) and dloss/dx
     return loss_x, dl_dx
@@ -95,18 +91,20 @@ for i = 1, 1000 do
     current_loss = 0
 
     -- an epoch is a full loop over our training data
-    for i = 1, data.size() do
+    for i = 1, train.size() do
         _,fs = optim.sgd(feval,x,sgd_params)
         current_loss = current_loss + fs[1]
     end
 
     -- report average error on epoch
-    current_loss = current_loss / data.size()
+    current_loss = current_loss / train.size()
     current_abs_grad = torch.norm( dl_dx )
 
     --if i%10 == 0 then
     print('i'..i..' loss = ' .. current_loss .. ' grad norm = ' .. current_abs_grad)
     --end
+
+    -- TODO: log validation error
 
     logger:add{['training error'] = current_loss}
     logger:style{['training error'] = '-'}
@@ -127,11 +125,11 @@ print("finished")
 
 -- Test example
 
-imgselector = 7
+imgselector = 1
 
-local origin = data.LR[imgselector]
-local gt = data.HR[imgselector]
-local test = net:forward(origin)
+local origin = test.LR[imgselector]
+local gt = test.HR[imgselector]
+local test_forward = net:forward(origin)
 --[[
 local scaled = image.scale(origin, gt:size(3), gt:size(2), 'simple') -- upscaled(nearest neighbor) LR
 local scaledbl = image.scale(origin, gt:size(3), gt:size(2), 'bilinear') -- upscaled(nearest neighbor) LR
@@ -139,4 +137,4 @@ local scaledbc = image.scale(origin, gt:size(3), gt:size(2), 'bicubic') -- upsca
 local diff = torch.add(gt, -1, test)
 local diff2 = torch.add(scaledbc, -1, test)
 --]]
-image.save("out/test.png", test)
+image.save("out/test.png", test_forward)
