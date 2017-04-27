@@ -92,11 +92,16 @@ else
     net = torch.load("upscaleDeConv.model")
 end
 
+saveNet = net:clone('weight','bias','gradWeight','gradBias')
+saveNet:clearState() --if it wasn't clean, clean it
+netUnion = nn.Container()
+netUnion:add(self.module)
+netUnion:add(self.saveModule)
+x, dl_dx = netUnion:getParameters()
+
 -- Train network
 
 criterion = nn.MSECriterion()
-
-x, dl_dx = net:getParameters()
 
 feval = function(x_new)
    
@@ -160,7 +165,7 @@ for i = 1,1000 do
 end
 
 -- [[
-torch.save("upscaleDeConv.model", net)
+torch.save("upscaleDeConv.model", saveNet)
 print("Model saved")
 --]]
 print("finished")
