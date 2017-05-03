@@ -1,15 +1,20 @@
+require 'torch'
+require 'nn'
+require 'nngraph'
+require 'rnn'
+
 function build_network(inputChannels, upscaleFactor, numRecursions)
 
     -- the upscale network
-    local net1 = nn.Sequential()
-    net1:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2))
-    net1:add(nn.ReLU())
-    net1:add(nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1))
-    net1:add(nn.PixelShuffle(upscaleFactor))
+    local netStart = nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1)()
+    local netEnd = netStart
+    netEnd = nn.ReLU()(netEnd)
+    netEnd = nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1)(netEnd)
+    netEnd = nn.ReLU()(netEnd)
+    netEnd = nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2)(netEnd)
+    netEnd = nn.ReLU()(netEnd)
+    netEnd = nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1)(netEnd)
+    netEnd = nn.PixelShuffle(upscaleFactor)(netEnd)
 
     -- inner part of the residual network
     local innerNet = nn.Sequential()
@@ -37,12 +42,13 @@ function build_network(inputChannels, upscaleFactor, numRecursions)
     )
 
     -- decorator, recursively apply to the same input (not multiple inputs)
-    rnn = nn.Repeater(recurrent, numRecursions)
+    netEnd = nn.Repeater(recurrent, numRecursions)(netEnd)
+    netEnd = nn.SelectTable(numRecursions)(netEnd) -- select last output from RNN
 
-    local net = nn.Sequential()
-    net:add(net1)
-    net:add(rnn)
-    net:add(nn.SelectTable(numRecursions)) -- select last output from RNN
+    local net = nn.gModule({netStart},{netEnd})
 
-    return net
+    --graph.graphvizFile(innerNet.fg, "dot", "innerNet.svg")
+    graph.graphvizFile(net.fg, "dot", "net.svg")
+
+    return net--, innerNet
 end
