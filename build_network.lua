@@ -48,8 +48,8 @@ function build_network(inputChannels, upscaleFactor, numRecursions)
 
     local net = nn.gModule({netStart},{netEnd})
 
-    --graph.graphvizFile(innerNet.fg, "dot", "innerNet.svg")
-    graph.graphvizFile(net.fg, "dot", "net.svg")
+    --graph.graphvizFile(innerNet.fg, "dot", "out/innerNet.svg")
+    graph.graphvizFile(net.fg, "dot", "out/net.svg")
 
     return net--, innerNet
 end
