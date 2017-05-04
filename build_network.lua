@@ -36,9 +36,10 @@ function build_network(inputChannels, upscaleFactor, numRecursions)
     local recurrent = nn.Recurrent(
         nn.Identity(),      -- start
         nn.Identity(),      -- input transform 
-        inside_recurrent,   -- hidden network 
-        nn.Identity(),      -- feedback
-        numRecursions      -- rho
+        inside_recurrent,   -- feedback
+        nn.Identity(),      -- transfer
+        numRecursions,      -- rho
+        nn.SelectTable(2)	-- merge
     )
 
     -- decorator, recursively apply to the same input (not multiple inputs)
