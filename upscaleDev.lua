@@ -19,10 +19,15 @@ paths.mkdir('out')
 --nngraph.setDebug(true)
 
 -- Set up Logger
-logger = optim.Logger('logs/loss_log.txt')
-loggerGrad = optim.Logger('logs/grad_norm_log.txt')
-loggerGrad:setNames{'Gradient norm'}
-loggerGrad:style{'-'}
+loss_logger = optim.Logger('logs/loss_log.txt')
+loss_logger:style{'+-', '+-'}
+loss_logger:setNames{'Training loss', 'Validation loss'}
+loss_logger:display(false) -- only save, but not display
+
+grad_logger = optim.Logger('logs/grad_norm_log.txt')
+grad_logger:setNames{'Gradient norm'}
+grad_logger:style{'-'}
+grad_logger:display(false) -- only save, but not display
 
 -- Load dataset
 images = load_images.load('datasets/Set14/image_SRF_4/', 'png', false)
@@ -51,7 +56,6 @@ netUnion:add(saveNet)
 x, dl_dx = netUnion:getParameters()
 
 -- Train network
-
 criterion = nn.MSECriterion()
 
 feval = function(x_new)
@@ -85,37 +89,44 @@ sgd_params = {
    momentum = 0
 }
 
-for i = 1, 1000 do
+epochs = 1000
 
-    -- this variable is used to estimate the average loss
-    current_loss = 0
+for i = 1, epochs do
 
-    -- an epoch is a full loop over our training data
+    train_loss = 0
+
+    -- Loop over all training samples (one epoch)
+    -- Run optimization and compute training loss
     for i = 1, train.size() do
-        _,fs = optim.sgd(feval,x,sgd_params)
-        current_loss = current_loss + fs[1]
+        _, fs = optim.sgd(feval, x, sgd_params)
+        train_loss = train_loss + fs[1]
+    end
+    train_loss = train_loss / train.size()
+
+    -- Compute gradient norm
+    current_abs_grad = torch.norm(dl_dx)
+    grad_logger:add{current_abs_grad}
+    if i % 10 == 0 then
+        grad_logger:plot()
     end
 
-    -- report average error on epoch
-    current_loss = current_loss / train.size()
-    current_abs_grad = torch.norm( dl_dx )
-
-    --if i%10 == 0 then
-    print('i'..i..' loss = ' .. current_loss .. ' grad norm = ' .. current_abs_grad)
-    --end
-
-    -- TODO: log validation error
-
-    logger:add{['training error'] = current_loss}
-    logger:style{['training error'] = '-'}
-    if i%10 == 0 then
-        logger:plot()  
+    -- Compute validation error
+    validation_loss = 0
+    for i = 1, validation.size() do
+        local target = train.HR[i]
+        local input = train.LR[i]
+        validation_loss = validation_loss + criterion:forward(net:forward(input), target)
+    end
+    validation_loss = validation_loss / validation.size()
+    
+    -- Report training and validation loss
+    loss_logger:add{train_loss, validation_loss}
+    if i % 10 == 0 then
+        loss_logger:plot()  
     end
 
-    loggerGrad:add{current_abs_grad}
-    if i%10 == 0 then
-        loggerGrad:plot()
-    end
+    -- Print to console
+    print('i'..i..' loss = ' .. train_loss .. ' grad norm = ' .. current_abs_grad)
 end
 
 
