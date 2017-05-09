@@ -22,12 +22,12 @@ paths.mkdir('out')
 loss_logger = optim.Logger('logs/loss.log')
 loss_logger:style{'+-', '+-'}
 loss_logger:setNames{'Training loss', 'Validation loss'}
-loss_logger:display(false) -- only save, but not display
+--loss_logger:display(false) -- only save, but not display
 
 grad_logger = optim.Logger('logs/grad_norm.log')
 grad_logger:setNames{'Gradient norm'}
 grad_logger:style{'-'}
-grad_logger:display(false) -- only save, but not display
+--grad_logger:display(false) -- only save, but not display
 
 -- Load dataset
 images = load_images.load('datasets/Set14/image_SRF_4/', 'png', false)
