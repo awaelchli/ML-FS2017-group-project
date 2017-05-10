@@ -95,7 +95,7 @@ sgd_params = {
    momentum = 0
 }
 
-epochs = 1000
+epochs = 10000
 
 for i = 1, epochs do
 
