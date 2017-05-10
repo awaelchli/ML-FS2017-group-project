@@ -1,5 +1,6 @@
 
 require 'nn'
+require 'PixelShuffle'
 --require 'nngraph'
 require 'load_images'
 require 'prepare_data'
