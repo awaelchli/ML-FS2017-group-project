@@ -90,7 +90,7 @@ end
 
 sgd_params = {
    learningRate = 1e-1,
-   learningRateDecay = 1e-2,
+   learningRateDecay = 1e-4,
    weightDecay = 0,
    momentum = 0
 }
