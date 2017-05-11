@@ -157,7 +157,9 @@ test_loss = 0
 for i = 1, test.size() do
     local target = test.HR[i]
     local input = test.LR[i]
-    test_loss = test_loss + criterion:forward(net:forward(input), target)
+    local result = net:forward(input)
+    test_loss = test_loss + criterion:forward(result, target)
+    image.save("out/results/img_"..string.format("%03d", i)..".png", result)
 end
 test_loss = test_loss / test.size()
 
