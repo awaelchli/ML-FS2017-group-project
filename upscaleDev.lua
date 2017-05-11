@@ -9,7 +9,6 @@ end
 require 'load_images'
 require 'prepare_data'
 require 'build_network'
---require 'build_network_no_graph'
 require 'split_data'
 require 'torch'
 require 'optim'
