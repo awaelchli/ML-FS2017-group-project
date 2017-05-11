@@ -4,6 +4,8 @@ require 'rnn'
 
 -- Ablation Study 1
 
+channels = actionParam.numHiddenChannelsInRecursion
+
 function build_network(inputChannels, upscaleFactor, numRecursions)
 
     -- the upscale network
@@ -19,9 +21,9 @@ function build_network(inputChannels, upscaleFactor, numRecursions)
 
     -- inner part of the recurrent network
     local inside_recurrent = nn.Sequential()
-    inside_recurrent:add(nn.SpatialConvolution(3, 32, 5, 5, 1, 1, 2, 2))
+    inside_recurrent:add(nn.SpatialConvolution(3, channels, 5, 5, 1, 1, 2, 2))
     inside_recurrent:add(nn.ReLU())
-    inside_recurrent:add(nn.SpatialConvolution(32, 3, 5, 5, 1, 1, 2, 2))
+    inside_recurrent:add(nn.SpatialConvolution(channels, 3, 5, 5, 1, 1, 2, 2))
     inside_recurrent:add(nn.ReLU())
 
     local recurrent = nn.Recurrent(

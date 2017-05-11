@@ -2,6 +2,8 @@ require 'torch'
 require 'nn'
 require 'rnn'
 
+channels = actionParam.numHiddenChannelsInRecursion
+
 function build_network(inputChannels, upscaleFactor, numRecursions)
 
     -- the upscale network
@@ -17,9 +19,9 @@ function build_network(inputChannels, upscaleFactor, numRecursions)
     
     -- inner part of the residual network
     local innerNet = nn.Sequential()
-    innerNet:add(nn.SpatialConvolution(3, 32, 5, 5, 1, 1, 2, 2))
+    innerNet:add(nn.SpatialConvolution(3, channels, 5, 5, 1, 1, 2, 2))
     innerNet:add(nn.ReLU())
-    innerNet:add(nn.SpatialConvolution(32, 3, 5, 5, 1, 1, 2, 2))
+    innerNet:add(nn.SpatialConvolution(channels, 3, 5, 5, 1, 1, 2, 2))
     innerNet:add(nn.ReLU())
 
     -- forward input to the end where the residual will be added

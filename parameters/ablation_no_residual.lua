@@ -1,7 +1,7 @@
 actionParam = {}
 
 -- Network params
-actionParam.networkFile = 'build_network_no_graph'
+actionParam.networkFile = 'build_network_ABL_no_residual'
 actionParam.inputChannels = 3
 actionParam.upscaleFactor = 4
 actionParam.numRecursions = 5
@@ -26,6 +26,6 @@ actionParam.testData = {'datasets/Set5/image_SRF_4/'}
 -- Code modules
 actionParam.create = 'createNetwork'
 actionParam.loadTrainData = 'trainData'
-actionParam.train = 'trainStepNetwork'
+actionParam.train = 'trainNetwork'
 actionParam.loadTestData = 'testData'
 actionParam.test = 'testNetwork'

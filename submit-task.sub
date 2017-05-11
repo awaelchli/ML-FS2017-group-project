@@ -13,4 +13,4 @@
 
 #$ -v DISPLAY
 
-~/th upscaleDev.lua
+~/th main.lua -param full_network -type train
