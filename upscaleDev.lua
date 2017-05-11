@@ -17,6 +17,7 @@ require 'gnuplot'
 require 'rnn'
 require 'dpnn'
 require 'paths'
+require 'metrics'
 
 
 -- Setup environment
@@ -106,7 +107,7 @@ sgd_params = {
    momentum = 0
 }
 
-epochs = 10000
+epochs = 10
 
 for i = 1, epochs do
 
@@ -154,22 +155,26 @@ print("finished")
 -- Test example
 
 test_loss = 0
+psnr = 0
+ssim = 0
 for i = 1, test.size() do
     local target = test.HR[i]
     local input = test.LR[i]
     local result = net:forward(input)
     test_loss = test_loss + criterion:forward(result, target)
+    psnr = psnr + PSNR(target, result)
+    ssim = ssim + SSIM(target, result)
     image.save("out/results/img_"..string.format("%03d", i)..".png", result)
 end
 test_loss = test_loss / test.size()
+psnr = psnr / test.size()
+ssim = ssim / test.size()
 
 print('Loss on Testset: ', test_loss)
+print('SSIM on Testset: ', ssim)
+print('PSNR on Testset: ', psnr)
 
-imgselector = 1
 
-local origin = test.LR[imgselector]
-local gt = test.HR[imgselector]
-local test_forward = net:forward(origin)
 --[[
 local scaled = image.scale(origin, gt:size(3), gt:size(2), 'simple') -- upscaled(nearest neighbor) LR
 local scaledbl = image.scale(origin, gt:size(3), gt:size(2), 'bilinear') -- upscaled(nearest neighbor) LR
@@ -177,4 +182,4 @@ local scaledbc = image.scale(origin, gt:size(3), gt:size(2), 'bicubic') -- upsca
 local diff = torch.add(gt, -1, test)
 local diff2 = torch.add(scaledbc, -1, test)
 --]]
-image.save("out/test.png", test_forward)
+
