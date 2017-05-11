@@ -90,7 +90,7 @@ sgd_params = {
    momentum = 0
 }
 
-epochs = 1000
+epochs = 100
 
 for i = 1, epochs do
 
@@ -114,8 +114,8 @@ for i = 1, epochs do
     -- Compute validation error
     validation_loss = 0
     for i = 1, validation.size() do
-        local target = train.HR[i]
-        local input = train.LR[i]
+        local target = validation.HR[i]
+        local input = validation.LR[i]
         validation_loss = validation_loss + criterion:forward(net:forward(input), target)
     end
     validation_loss = validation_loss / validation.size()
@@ -136,6 +136,16 @@ print("Model saved")
 print("finished")
 
 -- Test example
+
+test_loss = 0
+for i = 1, test.size() do
+    local target = test.HR[i]
+    local input = test.LR[i]
+    test_loss = test_loss + criterion:forward(net:forward(input), target)
+end
+test_loss = test_loss / test.size()
+
+print('Loss on Testset: ', test_loss)
 
 imgselector = 1
 
