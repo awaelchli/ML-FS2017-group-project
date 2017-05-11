@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#$ -N studi1_super_resolution
+#$ -N group_1_SR_full_network
 #$ -S /bin/bash
 #$ -cwd
 #$ -j y
@@ -13,4 +13,6 @@
 
 #$ -v DISPLAY
 
+~/th main.lua -param full_network -type create
 ~/th main.lua -param full_network -type train
+~/th main.lua -param full_network -type test
