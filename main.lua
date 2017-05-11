@@ -37,6 +37,9 @@ if argv.epochs ~= 0 then
 	actionParam.epochs = argv.epochs
 end
 
+print('Parameter set:')
+print(actionParam)
+
 if argv.type == 'create' then
 	dofile('mod_'..actionParam.create..'.lua')
 elseif argv.type == 'train' then
