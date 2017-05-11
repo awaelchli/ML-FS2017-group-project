@@ -27,5 +27,5 @@ actionParam.testData = {'datasets/Set5/image_SRF_4/'}
 actionParam.create = 'createNetwork'
 actionParam.loadTrainData = 'trainData'
 actionParam.train = 'trainStepNetwork'
-actionParam.loadTestData = 'testData'
+actionParam.loadTestData = 'loadTestData'
 actionParam.test = 'testNetwork'
