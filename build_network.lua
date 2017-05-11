@@ -26,7 +26,7 @@ function build_network(inputChannels, upscaleFactor, numRecursions)
     -- forward input to the end where the residual will be added
     local resNet = nn.ConcatTable()
     resNet:add(nn.Identity())
-    resNet.add(innerNet)
+    resNet:add(innerNet)
 
     -- inner part of recurrent net is the residual net
     local inside_recurrent = nn.Sequential()

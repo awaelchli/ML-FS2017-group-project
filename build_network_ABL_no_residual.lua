@@ -34,12 +34,13 @@ function build_network(inputChannels, upscaleFactor, numRecursions)
     )
 
     -- decorator, recursively apply to the same input (not multiple inputs)
-    rnn = nn.Repeater(recurrent, numRecursions)
+    local rnn = nn.Sequential()
+    rnn:add(nn.Repeater(recurrent, numRecursions))
+    rnn:add(nn.SelectTable(numRecursions)) -- select last output from Repeater
 
     local net = nn.Sequential()
     net:add(net1)
     net:add(rnn)
-    net:add(nn.SelectTable(numRecursions)) -- select last output from RNN
 
     return net
 end
