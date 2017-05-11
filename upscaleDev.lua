@@ -17,6 +17,7 @@ require 'gnuplot'
 require 'rnn'
 require 'dpnn'
 require 'paths'
+require 'metrics'
 
 
 -- Setup environment
@@ -36,11 +37,22 @@ grad_logger:style{'-'}
 --grad_logger:display(false) -- only save, but not display
 
 -- Load dataset
+test_separate = true
 images = load_images.load('datasets/Set14/image_SRF_4/', 'png', false)
+
+if test_separate then
+    test_images = load_images.load('datasets/Set5/image_SRF_4/', 'png', false)
+end
+
 
 -- Preprocess dataset
 data = prepare_data(images)
-train, validation, test = split_data(data, 0.8, 0.1)
+if test_separate then
+    train, validation = split_data(data, 0.8, 0.2)
+    test = prepare_data(test_images)
+else
+    train, validation, test = split_data(data, 0.8, 0.1)
+end
 
 -- Make network
 upscaleFactor = 4
@@ -95,7 +107,7 @@ sgd_params = {
    momentum = 0
 }
 
-epochs = 10000
+epochs = 10
 
 for i = 1, epochs do
 
@@ -143,20 +155,26 @@ print("finished")
 -- Test example
 
 test_loss = 0
+psnr = 0
+ssim = 0
 for i = 1, test.size() do
     local target = test.HR[i]
     local input = test.LR[i]
-    test_loss = test_loss + criterion:forward(net:forward(input), target)
+    local result = net:forward(input)
+    test_loss = test_loss + criterion:forward(result, target)
+    psnr = psnr + PSNR(target, result)
+    ssim = ssim + SSIM(target, result)
+    image.save("out/results/img_"..string.format("%03d", i)..".png", result)
 end
 test_loss = test_loss / test.size()
+psnr = psnr / test.size()
+ssim = ssim / test.size()
 
 print('Loss on Testset: ', test_loss)
+print('SSIM on Testset: ', ssim)
+print('PSNR on Testset: ', psnr)
 
-imgselector = 1
 
-local origin = test.LR[imgselector]
-local gt = test.HR[imgselector]
-local test_forward = net:forward(origin)
 --[[
 local scaled = image.scale(origin, gt:size(3), gt:size(2), 'simple') -- upscaled(nearest neighbor) LR
 local scaledbl = image.scale(origin, gt:size(3), gt:size(2), 'bilinear') -- upscaled(nearest neighbor) LR
@@ -164,4 +182,4 @@ local scaledbc = image.scale(origin, gt:size(3), gt:size(2), 'bicubic') -- upsca
 local diff = torch.add(gt, -1, test)
 local diff2 = torch.add(scaledbc, -1, test)
 --]]
-image.save("out/test.png", test_forward)
+
