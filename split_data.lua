@@ -7,6 +7,8 @@ function split_data(data, trainRatio, validationRatio)
     local train = {}
     local validation = {}
     local test = {}
+    
+    local j = 1
 
     local fill_split = function(data, split, range) 
         split.HR = {} 
@@ -14,8 +16,9 @@ function split_data(data, trainRatio, validationRatio)
         split.size = function() return range end
 
         for i = 1, range do
-            split.HR[i] = data.HR[i]
-            split.LR[i] = data.LR[i]
+            split.HR[i] = data.HR[j]
+            split.LR[i] = data.LR[j]
+            j = j + 1
         end
     end
 

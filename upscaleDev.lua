@@ -1,10 +1,15 @@
 
 require 'nn'
+
+if not package.loaded['nn.PixelShuffle'] then
+    require 'PixelShuffle'
+end
+
 --require 'nngraph'
 require 'load_images'
 require 'prepare_data'
---require 'build_network'
-require 'build_network_no_graph'
+require 'build_network'
+--require 'build_network_no_graph'
 require 'split_data'
 require 'torch'
 require 'optim'
@@ -85,12 +90,12 @@ end
 
 sgd_params = {
    learningRate = 1e-1,
-   learningRateDecay = 1e-2,
+   learningRateDecay = 1e-4,
    weightDecay = 0,
    momentum = 0
 }
 
-epochs = 100
+epochs = 10000
 
 for i = 1, epochs do
 
