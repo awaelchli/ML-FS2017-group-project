@@ -36,11 +36,22 @@ grad_logger:style{'-'}
 --grad_logger:display(false) -- only save, but not display
 
 -- Load dataset
+test_separate = true
 images = load_images.load('datasets/Set14/image_SRF_4/', 'png', false)
+
+if test_separate then
+    test_images = load_images.load('datasets/Set5/image_SRF_4/', 'png', false)
+end
+
 
 -- Preprocess dataset
 data = prepare_data(images)
-train, validation, test = split_data(data, 0.8, 0.1)
+if test_separate then
+    train, validation = split_data(data, 0.8, 0.2)
+    test = prepare_data(test_images)
+else
+    train, validation, test = split_data(data, 0.8, 0.1)
+end
 
 -- Make network
 upscaleFactor = 4
