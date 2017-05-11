@@ -111,7 +111,7 @@ for i = 1, epochs do
     end
 
     -- Print to console
-		print('i'..i..'\tloss = ' .. train_loss .. '\tgrad norm = ' .. current_abs_grad)
+		print('epoch = '..i..'\tloss = ' .. train_loss .. '\tgradient norm = ' .. current_abs_grad)
     if analysisInterval and i % analysisInterval == 0 then
 		print('\tpsnr = ' .. psnr .. '   \tssim = ' .. ssim)
 	end

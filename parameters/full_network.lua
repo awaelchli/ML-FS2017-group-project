@@ -1,7 +1,7 @@
 actionParam = {}
 
 -- Network params
-actionParam.networkFile = 'build_network_no_graph'
+actionParam.networkFile = 'build_network'
 actionParam.inputChannels = 3
 actionParam.upscaleFactor = 4
 actionParam.numRecursions = 5
