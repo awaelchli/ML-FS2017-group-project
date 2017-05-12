@@ -5,7 +5,7 @@ require 'metrics'
 
 
 -- Load Network
-net = torch.load("out/"..actionParam.name..".model")
+net = torch.load(actionParam.folders.output .. actionParam.name .. ".model")
 
 
 -- Test example
@@ -20,7 +20,7 @@ for i = 1, test.size() do
     test_loss = test_loss + criterion:forward(result, target)
     psnr = psnr + PSNR(target, result)
     ssim = ssim + SSIM(target, result)
-    image.save("out/results/img_"..string.format("%03d", i)..".png", result)
+    image.save(actionParam.folders.testResults .. "img_" .. string.format("%03d", i) .. ".png", result)
 end
 test_loss = test_loss / test.size()
 psnr = psnr / test.size()

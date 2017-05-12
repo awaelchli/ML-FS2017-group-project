@@ -12,6 +12,6 @@ netUnion:add(saveNet)
 x, dl_dx = netUnion:getParameters()
 
 print("Saving model")
-torch.save("out/"..actionParam.name..".model", saveNet)
+torch.save(actionParam.folders.output .. actionParam.name .. ".model", saveNet)
 
 print("Done")

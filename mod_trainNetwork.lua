@@ -14,19 +14,19 @@ analysisInterval = actionParam.analysisInterval
 
 
 -- Set up Logger
-loss_logger = optim.Logger('logs/loss.log')
+loss_logger = optim.Logger(actionParam.folders.logs .. 'loss.log')
 loss_logger:style{'+-', '+-'}
 loss_logger:setNames{'Training loss', 'Validation loss'}
 --loss_logger:display(false) -- only save, but not display
 
-grad_logger = optim.Logger('logs/grad_norm.log')
+grad_logger = optim.Logger(actionParam.folders.logs .. 'grad_norm.log')
 grad_logger:setNames{'Gradient norm'}
 grad_logger:style{'-'}
 --grad_logger:display(false) -- only save, but not display
 
 
 -- Load Network
-net = torch.load("out/"..actionParam.name..".model")
+net = torch.load(actionParam.folders.output .. actionParam.name..".model")
 
 saveNet = net:clone('weight','bias','gradWeight','gradBias')
 saveNet:clearState() --if it wasn't clean, clean it
@@ -111,19 +111,19 @@ for i = 1, epochs do
     end
 
     -- Print to console
-		print('epoch = '..i..'\tloss = ' .. train_loss .. '\tgradient norm = ' .. current_abs_grad)
+		print('epoch = ' .. i .. '\tloss = ' .. train_loss .. '\tgradient norm = ' .. current_abs_grad)
     if analysisInterval and i % analysisInterval == 0 then
 		print('\tpsnr = ' .. psnr .. '   \tssim = ' .. ssim)
 	end
     
     -- Periodically save network
     if saveInterval and i % saveInterval == 0 then
-        torch.save("out/"..actionParam.name..".model", saveNet)
+        torch.save(actionParam.folders.output .. actionParam.name .. ".model", saveNet)
         print("Model saved")
     end
 end
 
 
-torch.save("out/"..actionParam.name..".model", saveNet)
+torch.save(actionParam.folders.output .. actionParam.name .. ".model", saveNet)
 print("Model saved")
 print("Finished")

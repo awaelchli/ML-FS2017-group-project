@@ -10,7 +10,7 @@ actionParam.numHiddenChannelsInRecursion = 6
 actionParam.epochs = 100
 actionParam.sgd_params = {
    learningRate = 1e-1,
-   learningRateDecay = 1e-4,
+   learningRateDecay = 1e-8,
    weightDecay = 0,
    momentum = 0
 }

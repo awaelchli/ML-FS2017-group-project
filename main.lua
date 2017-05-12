@@ -10,7 +10,7 @@ require 'rnn'
 require 'dpnn'
 require 'nngraph'
 require 'gnuplot'
-require 'paths'
+require 'environment'
 
 cmd = torch.CmdLine()
 cmd:option('-param', 'full_network', 'pass name of parameter file to be used (without ".lua")')
@@ -20,12 +20,11 @@ cmd:option('-epochs', 0, 'maximum number of epochs to train (default taken from 
 
 local argv = cmd:parse(arg)
 
--- Setup environment
-paths.mkdir('logs')
-paths.mkdir('out')
-paths.mkdir('out/results')
-
+-- Load the parameters
 require('parameters.'..argv.param)
+
+-- Setup environment (create folders for results etc.)
+environment.setup(actionParam)
 
 if argv.name == '0' then
 	actionParam.name = argv.param

@@ -1,5 +1,11 @@
 actionParam = {}
 
+-- Environment
+actionParam.folders = {}
+actionParam.folders.logs = 'logs/'
+actionParam.folders.output = 'out/'
+actionParam.folders.testResults = actionParam.folders.output .. 'results/'
+
 -- Network params
 actionParam.networkFile = 'build_network'
 actionParam.inputChannels = 3

@@ -171,12 +171,12 @@ for i = 1, epochs do
     
     -- Periodically save network
     if saveInterval and i % saveInterval == 0 then
-        torch.save("out/"..actionParam.name..".model", saveNet)
+        torch.save(actionParam.folders.output .. actionParam.name .. ".model", saveNet)
         print("Model saved")
     end
 end
 
 
-torch.save("out/"..actionParam.name..".model", saveNet)
+torch.save(actionParam.folders.output .. actionParam.name .. ".model", saveNet)
 print("Model saved")
 print("Finished")
