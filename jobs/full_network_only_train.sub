@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#$ -N group_1_SR_full_network_only_train
+#$ -S /bin/bash
+#$ -cwd
+#$ -j y
+#$ -pe smp 1
+
+# Array job: -t <range>
+#$ -t 1
+
+#$ -l h=node01
+
+#$ -v DISPLAY
+
+~/th main.lua -param full_network -type train -epochs 100 
