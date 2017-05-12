@@ -1,5 +1,30 @@
 require 'image'
 
+function averagePSNR(set1, set2)
+
+    -- TODO: test sizes
+
+    local avgPSNR = 0
+    for i = 1, #set1 do
+        avgPSNR = avgPSNR + PSNR(set1[i], set2[i])
+    end
+
+    return avgPSNR / #set1
+end
+
+function averageSSIM(set1, set2)
+
+    -- TODO: test sizes
+
+    local avgSSIM = 0
+    for i = 1, #set1 do
+        avgSSIM = avgSSIM + SSIM(set1[i], set2[i])
+    end
+
+    return avgSSIM / #set1
+end
+
+
 function PSNR(img1, img2)
 
    local eps = 0
