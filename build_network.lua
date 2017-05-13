@@ -1,6 +1,5 @@
 require 'torch'
 require 'nn'
-require 'nngraph'
 require 'rnn'
 
 channels = actionParam.numHiddenChannelsInRecursion
@@ -8,15 +7,15 @@ channels = actionParam.numHiddenChannelsInRecursion
 function build_network(inputChannels, upscaleFactor, numRecursions)
 
     -- the upscale network
-    local netStart = nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1)()
-    local netEnd = netStart
-    netEnd = nn.ReLU()(netEnd)
-    netEnd = nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1)(netEnd)
-    netEnd = nn.ReLU()(netEnd)
-    netEnd = nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2)(netEnd)
-    netEnd = nn.ReLU()(netEnd)
-    netEnd = nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1)(netEnd)
-    netEnd = nn.PixelShuffle(upscaleFactor)(netEnd)
+    local net1 = nn.Sequential()
+    net1:add(nn.SpatialConvolution(inputChannels, 6, 3, 3, 1, 1, 1, 1))
+    net1:add(nn.ReLU())
+    net1:add(nn.SpatialConvolution(6, 6, 3, 3, 1, 1, 1, 1))
+    net1:add(nn.ReLU())
+    net1:add(nn.SpatialConvolution(6, 32, 5, 5, 1, 1, 2, 2))
+    net1:add(nn.ReLU())
+    net1:add(nn.SpatialConvolution(32, inputChannels * upscaleFactor * upscaleFactor, 3, 3, 1, 1, 1, 1))
+    net1:add(nn.PixelShuffle(upscaleFactor))
 
     -- inner part of the residual network
     local innerNet = nn.Sequential()
@@ -41,17 +40,17 @@ function build_network(inputChannels, upscaleFactor, numRecursions)
         inside_recurrent,   -- feedback
         nn.Identity(),      -- transfer
         numRecursions,      -- rho
-        nn.SelectTable(2)	-- merge
+        nn.SelectTable(2)   -- merge
     )
 
     -- decorator, recursively apply to the same input (not multiple inputs)
-    netEnd = nn.Repeater(recurrent, numRecursions)(netEnd)
-    netEnd = nn.SelectTable(numRecursions)(netEnd) -- select last output from RNN
+    local rnn = nn.Sequential()
+    rnn:add(nn.Repeater(recurrent, numRecursions))
+    rnn:add(nn.SelectTable(numRecursions)) -- select last output from Repeater
 
-    local net = nn.gModule({netStart},{netEnd})
+    local net = nn.Sequential()
+    net:add(net1)
+    net:add(rnn)
 
-    --graph.graphvizFile(innerNet.fg, "dot", "out/innerNet.svg")
-    graph.graphvizFile(net.fg, "dot", "out/net.svg")
-
-    return net--, innerNet
+    return net
 end
