@@ -1,0 +1,4 @@
+Average PSNR:
+nearest:	24.607357842119
+bilinear:	24.399109474595
+bicubic:	24.692710707112

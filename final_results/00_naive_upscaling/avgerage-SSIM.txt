@@ -1,0 +1,4 @@
+Average SSIM:
+nearest:	0.74219570992711
+bilinear:	0.75848489773438
+bicubic:	0.77346506610838
