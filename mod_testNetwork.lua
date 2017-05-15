@@ -7,6 +7,7 @@ require 'metrics'
 -- Load Network
 net = torch.load(actionParam.folders.output .. actionParam.name .. ".model")
 
+-- TODO: remove duplicate code (see metrics.lua)
 
 -- Test example
 criterion = nn.MSECriterion()
@@ -26,6 +27,14 @@ test_loss = test_loss / test.size()
 psnr = psnr / test.size()
 ssim = ssim / test.size()
 
+-- Print results
 print('Loss on Testset: ', test_loss)
 print('SSIM on Testset: ', ssim)
 print('PSNR on Testset: ', psnr)
+
+io.open(actionParam.folders.testResults .. 'metrics.txt', 'w')
+    :write('Statistics on testset:')
+    :write('Average PSNR: ' .. psnr .. 'dB', '\n')
+    :write('Average SSIM: ' .. ssim, '\n')
+    :write('Loss: ' .. test_loss, '\n')
+    :close()
