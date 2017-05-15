@@ -14,5 +14,5 @@
 #$ -v DISPLAY
 
 ~/th main.lua -param ablation_no_residual -type create
-~/th main.lua -param ablation_no_residual -type train -epochs 100
+~/th main.lua -param ablation_no_residual -type train -epochs 500
 ~/th main.lua -param ablation_no_residual -type test

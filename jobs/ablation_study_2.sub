@@ -14,5 +14,5 @@
 #$ -v DISPLAY
 
 ~/th main.lua -param ablation_only_upscale -type create
-~/th main.lua -param ablation_only_upscale -type train -epochs 100
+~/th main.lua -param ablation_only_upscale -type train -epochs 500
 ~/th main.lua -param ablation_only_upscale -type test
