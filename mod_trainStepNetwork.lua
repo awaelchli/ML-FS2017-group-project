@@ -14,19 +14,19 @@ analysisInterval = actionParam.analysisInterval
 
 
 -- Set up Logger
-loss_logger = optim.Logger('logs/loss.log')
+loss_logger = optim.Logger(actionParam.folders.logs .. 'loss.log')
 loss_logger:style{'+-', '+-','+-', '+-'}
 loss_logger:setNames{'Training loss1', 'Training loss2', 'Validation loss1', 'Validation loss2'}
 --loss_logger:display(false) -- only save, but not display
 
-grad_logger = optim.Logger('logs/grad_norm.log')
-grad_logger:setNames{'Gradient1 norm', 'Gradient1 norm'}
+grad_logger = optim.Logger(actionParam.folders.logs 'grad_norm.log')
+grad_logger:setNames{'Gradient1 norm', 'Gradient2 norm'}
 grad_logger:style{'-','-'}
 --grad_logger:display(false) -- only save, but not display
 
 
 -- Load Network
-net = torch.load("out/"..actionParam.name..".model")
+net = torch.load(actionParam.folders.output .. actionParam.name .. ".model")
 net1 = net:get(1)
 net2 = net:get(2)
 local net1paramsize, net1gradsize = net1:getParameters()
