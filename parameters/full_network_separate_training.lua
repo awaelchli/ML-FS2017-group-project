@@ -22,3 +22,4 @@ actionParam.mainData = {'datasets/BSD100_SR/image_SRF_4/','datasets/Set14/image_
 actionParam.testData = {'datasets/Set5/image_SRF_4/'}
 
 actionParam.folders.testResults = actionParam.folders.output .. 'results/separate_training/'
+actionParam.folders.logs = 'logs/separate_training/'

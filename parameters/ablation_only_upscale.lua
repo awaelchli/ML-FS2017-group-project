@@ -20,3 +20,4 @@ actionParam.mainData = {'datasets/BSD100_SR/image_SRF_4/','datasets/Set14/image_
 actionParam.testData = {'datasets/Set5/image_SRF_4/'}
 
 actionParam.folders.testResults = actionParam.folders.output .. 'results/upscale_only/'
+actionParam.folders.logs = 'logs/only_upscale/'
