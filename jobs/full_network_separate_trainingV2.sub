@@ -1,0 +1,34 @@
+#!/bin/bash
+
+#$ -N group_1_SR_full_network_separate_training
+#$ -S /bin/bash
+#$ -cwd
+#$ -j y
+#$ -pe smp 1
+
+# Array job: -t <range>
+#$ -t 1
+
+#$ -l h=node01
+
+#$ -v DISPLAY
+
+
+# Pre-train upscale network part first 
+~/th main.lua -param ablation_only_upscale -name pretrained_upscale_part -type create
+~/th main.lua -param ablation_only_upscale -name pretrained_upscale_part -type train -epochs 1000
+
+# Train only recurrent part with fixed upscale part
+~/th main.lua -param full_network_separate_training -type create
+~/th main.lua -param full_network_separate_training -type train -epochs 500
+~/th main.lua -param full_network_separate_training -type test
+
+# Copy results to home folder for download
+mkdir -p ~/group1-out/results/
+mkdir -p ~/group1-out/logs/
+
+NAME = part_networks_separate
+
+cp -r out/results/"$NAME" ~/group1-out/results
+cp -r logs/"$NAME" ~/group1-out/logs
+cp out/full_network_separate_training.model ~/group1-out/results/"$NAME"

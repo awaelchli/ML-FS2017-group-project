@@ -18,7 +18,7 @@ actionParam.sgd_params = {
    momentum = 0
 }
 
-actionParam.partname = 'ablation_only_upscale'
+actionParam.partname = 'pretrained_upscale_part'
 
 actionParam.mainData = {'datasets/BSD100_SR/image_SRF_4/','datasets/Set14/image_SRF_4/'}
 actionParam.testData = {'datasets/Set5/image_SRF_4/'}
