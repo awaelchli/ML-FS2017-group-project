@@ -15,8 +15,8 @@ analysisInterval = actionParam.analysisInterval
 
 -- Set up Logger
 loss_logger = optim.Logger(actionParam.folders.logs .. 'loss.log')
-loss_logger:style{'+-', '+-'}
 loss_logger:setNames{'Training loss2', 'Validation loss2'}
+loss_logger:style{'+-', '+-'}
 --loss_logger:display(false) -- only save, but not display
 
 grad_logger = optim.Logger(actionParam.folders.logs .. 'grad_norm.log')
@@ -96,7 +96,7 @@ for i = 1, epochs do
 
     -- Compute gradient norm
     current_abs_grad2 = torch.norm(dl_dx2)
-    grad_logger:add{ current_abs_grad2}
+    grad_logger:add{current_abs_grad2}
     if saveInterval and i % saveInterval == 0 then
         grad_logger:plot()
     end
