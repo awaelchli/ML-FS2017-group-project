@@ -19,7 +19,7 @@ loss_logger:style{'+-', '+-'}
 loss_logger:setNames{'Training loss2', 'Validation loss2'}
 --loss_logger:display(false) -- only save, but not display
 
-grad_logger = optim.Logger(actionParam.folders.logs 'grad_norm.log')
+grad_logger = optim.Logger(actionParam.folders.logs .. 'grad_norm.log')
 grad_logger:setNames{'Gradient2 norm'}
 grad_logger:style{'-'}
 --grad_logger:display(false) -- only save, but not display
