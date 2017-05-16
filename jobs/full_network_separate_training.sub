@@ -13,9 +13,9 @@
 
 #$ -v DISPLAY
 
-#~/th main.lua -param full_network_separate_training -type create
-#~/th main.lua -param full_network_separate_training -type train -epochs 500
-#~/th main.lua -param full_network_separate_training -type test
+~/th main.lua -param full_network_separate_training -type create
+~/th main.lua -param full_network_separate_training -type train -epochs 500
+~/th main.lua -param full_network_separate_training -type test
 
 mkdir -p ~/group1-out/results/
 mkdir -p ~/group1-out/logs/
