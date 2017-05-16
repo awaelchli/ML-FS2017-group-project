@@ -33,7 +33,7 @@ print('SSIM on Testset: ', ssim)
 print('PSNR on Testset: ', psnr)
 
 io.open(actionParam.folders.testResults .. 'metrics.txt', 'w')
-    :write('Statistics on testset:')
+    :write('Statistics on testset:', '\n')
     :write('Average PSNR: ' .. psnr .. 'dB', '\n')
     :write('Average SSIM: ' .. ssim, '\n')
     :write('Loss: ' .. test_loss, '\n')
