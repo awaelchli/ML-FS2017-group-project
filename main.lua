@@ -30,6 +30,8 @@ if argv.name == '0' then
 	actionParam.name = argv.param
 else
 	actionParam.name = argv.name
+	actionParam.folders.testResults = actionParam.folders.output .. 'results/' .. argv.name .. '/'
+	actionParam.folders.logs = 'logs/' .. argv.name .. '/'
 end
 
 if argv.epochs ~= 0 then
