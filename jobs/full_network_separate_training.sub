@@ -13,13 +13,13 @@
 
 #$ -v DISPLAY
 
-~/th main.lua -param full_network_separate_training -type create
-~/th main.lua -param full_network_separate_training -type train -epochs 500
-~/th main.lua -param full_network_separate_training -type test
+#~/th main.lua -param full_network_separate_training -type create
+#~/th main.lua -param full_network_separate_training -type train -epochs 500
+#~/th main.lua -param full_network_separate_training -type test
 
-~/mkdir ~/group1-out/results/
-~/mkdir ~/group1-out/logs/
+mkdir -p ~/group1-out/results/
+mkdir -p ~/group1-out/logs/
 
-~/cp -r out/results/separate_training ~/group1-out/results
-~/cp -r logs/separate_training ~/group1-out/logs
-~/cp out/full_network_separate_training.model ~/group1-out/results/separate_training/
+cp -r out/results/separate_training ~/group1-out/results
+cp -r logs/separate_training ~/group1-out/logs
+cp out/full_network_separate_training.model ~/group1-out/results/separate_training/
