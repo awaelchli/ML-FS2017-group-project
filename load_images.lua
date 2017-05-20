@@ -4,7 +4,7 @@ require 'torch'
 
 load_images = {}
 
-function load_images.load(dir, ext, verbose)
+function load_images.load(dir, ext, verbose, imglist)
 
 	if verbose == nil then
 		verbose = true
@@ -48,7 +48,7 @@ function load_images.load(dir, ext, verbose)
 	-- 3. Finally we load images
 
 	-- Go over the file list:
-	local images = {}
+	local images = imglist or {}
 	for i,file in ipairs(files) do
 	   -- load each image
 	   table.insert(images, image.load(file))
@@ -61,6 +61,17 @@ function load_images.load(dir, ext, verbose)
 
 	return images
 
+end
+
+function load_images.multi_load(dirlist, ext)
+	imgs = {}
+	
+	for i = 1,#dirlist do
+		imgs = load_images.load(dirlist[i], ext, false, imgs)
+	end
+
+	return imgs
+	
 end
 
 return load_images

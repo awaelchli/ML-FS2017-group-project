@@ -25,8 +25,8 @@ actionParam.saveInterval = 10			-- set to false to disable
 actionParam.analysisInterval = 5		-- set to false to disable
 
 -- Data set params
-actionParam.testeSeparate = true
-actionParam.mainData = {'datasets/BSD100_SR/image_SRF_4/','datasets/Set14/image_SRF_4/'}
+actionParam.trainingData = {'datasets/BSD100_SR/image_SRF_4/'}
+actionParam.validationData = {'datasets/Set14/image_SRF_4/'}
 actionParam.testData = {'datasets/Set5/image_SRF_4/'}
 
 -- Code modules

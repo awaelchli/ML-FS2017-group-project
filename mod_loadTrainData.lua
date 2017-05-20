@@ -4,21 +4,10 @@ require 'split_data'
 require 'metrics'
 
 
-test_separate = actionParam.testeSeparate
-
-
 -- Load dataset
-images = load_images.load(actionParam.mainData[1], 'png', false)
-
-if test_separate then
-    test_images = load_images.load(actionParam.testData[1], 'png', false)
-end
+train_images = load_images.multi_load(actionParam.trainingData, 'png')
+validation_images = load_images.multi_load(actionParam.validationData, 'png')
 
 -- Preprocess dataset
-data = prepare_data(images)
-if test_separate then
-    train, validation = split_data(data, 0.8, 0.2)
-    test = prepare_data(test_images)
-else
-    train, validation, test = split_data(data, 0.8, 0.1)
-end
+train = prepare_data(train_images)
+validation = prepare_data(validation_images)
