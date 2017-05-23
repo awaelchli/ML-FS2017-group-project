@@ -18,7 +18,8 @@ actionParam.sgd_params = {
    momentum = 0
 }
 
-actionParam.mainData = {'datasets/BSD100_SR/image_SRF_4/','datasets/Set14/image_SRF_4/'}
+actionParam.trainingData = {'datasets/BSD100_SR/image_SRF_4/'}
+actionParam.validationData = {'datasets/Set14/image_SRF_4/'}
 actionParam.testData = {'datasets/Set5/image_SRF_4/'}
 
 actionParam.folders.testResults = actionParam.folders.output .. 'results/separate_training/'
