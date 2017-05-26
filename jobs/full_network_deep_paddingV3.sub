@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#$ -N group_1_SR_full_network_deep_paddingV3
+#$ -S /bin/bash
+#$ -cwd
+#$ -j y
+#$ -pe smp 1
+
+# Array job: -t <range>
+#$ -t 1
+
+#$ -l h=node01
+
+#$ -v DISPLAY
+
+
+~/th main.lua -param full_network_deep_paddingV3 -type create
+~/th main.lua -param full_network_deep_paddingV3 -type train -epochs 500
+~/th main.lua -param full_network_deep_paddingV3 -type test
+
+# Copy results to home folder for download
+mkdir -p ~/group1-out2/results/
+
+cp -r out/results/full_network_deep_paddingV3 ~/group1-out2/results
+cp out/full_network_deep_paddingV3.model ~/group1-out2/results/full_network_deep_paddingV3
