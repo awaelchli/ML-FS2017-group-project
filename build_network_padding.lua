@@ -2,8 +2,7 @@ require 'torch'
 require 'nn'
 require 'rnn'
 
---channels = actionParam.numHiddenChannelsInRecursion
-channels = 8
+channels = actionParam.numHiddenChannelsInRecursion
 
 function build_network(inputChannels, upscaleFactor, numRecursions)
 
