@@ -4,3 +4,7 @@
 ./*.eps
 logs/*
 out/*
+*.aux
+report/Report.log
+report/Report.out
+*.gz
