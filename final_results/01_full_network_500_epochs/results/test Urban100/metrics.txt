@@ -1,0 +1,4 @@
+Statistics on testset:
+Average PSNR: 21.540107747426dB
+Average SSIM: 0.6410268976493
+Loss: 0.0088130175818732
